@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/agentskills/agentskills/main/schemas/marketplace.schema.json",
+  "name": "helmguild-plugins-public",
+  "description": "Public, community-licensed plugins for helmguild mentors — open AgentSkills bundled per the Claude Code plugin spec. The sibling private/commercial marketplace lives at helmut-hoffer-von-ankershoffen/helmguild-plugins.",
+  "owner": {
+    "name": "Helmut Hoffer von Ankershoffen",
+    "email": "helmuthva@gmail.com"
+  },
+  "metadata": {
+    "version": "0.1.0",
+    "homepage": "https://www.helmguild.com/",
+    "license": "CC-BY-4.0",
+    "commercial": false,
+    "distribution": "public"
+  },
+  "plugins": []
+}
