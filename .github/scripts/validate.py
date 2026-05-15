@@ -92,10 +92,26 @@ def check_skill(skill_dir: Path, plugin_name: str, seen_orders: set[int]) -> Non
     desc = fm.get("description")
     if not isinstance(desc, str) or not (1 <= len(desc) <= 1024):
         err(skill_md, "`description` missing or wrong length (must be 1-1024 chars)")
-    expected_license = "LicenseRef-helmguild-mentoring-1.0"
+    # Public marketplace accepts recognised OSI / Creative Commons
+    # licenses on skill bodies. The canonical pair for this marketplace
+    # is CC-BY-4.0 (skill text) + MIT (bundled code). LicenseRef-
+    # helmguild-mentoring-1.0 is forbidden here — that's the private
+    # sibling marketplace's proprietary license.
     skill_license = fm.get("license")
-    if skill_license != expected_license:
-        err(skill_md, f"`license` is {skill_license!r}; expected {expected_license!r}")
+    allowed_skill_licenses = {
+        "CC-BY-4.0",
+        "CC0-1.0",
+        "MIT",
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause",
+        "ISC",
+    }
+    if skill_license not in allowed_skill_licenses:
+        err(
+            skill_md,
+            f"`license` is {skill_license!r}; expected one of {sorted(allowed_skill_licenses)}",
+        )
     metadata = fm.get("metadata") or {}
     if not isinstance(metadata, dict):
         err(skill_md, "`metadata` must be a YAML mapping")
@@ -180,8 +196,15 @@ def check_plugin(plugin_dir: Path) -> str | None:
     # Every plugin in THIS marketplace is non-commercial; the sibling
     # private helmguild-plugins repo holds commercial plugins under
     # the Helmguild Mentoring License.
-    if manifest.get("commercial") is not False:
-        err(manifest_path, "plugin.json `commercial: false` required in the helmguild-plugins-public marketplace")
+    #
+    # Claude Code's plugin.json schema rejects custom top-level keys, so
+    # the `commercial` flag does NOT live on plugin.json itself — it
+    # lives on the marketplace.json at `metadata.commercial` (asserted
+    # below, line ~238) + optionally per-entry. We tolerate either
+    # absence-of-key OR explicit `commercial: false` here; we forbid
+    # `commercial: true` on a public-marketplace plugin.
+    if manifest.get("commercial") is True:
+        err(manifest_path, "plugin.json must not declare `commercial: true` in the helmguild-plugins-public marketplace")
 
     # Every bundled script (under scripts/ or mcp-server/) must have a
     # matching test under tests/test-<dir>-<stem>.{sh,mjs}. Catches the
